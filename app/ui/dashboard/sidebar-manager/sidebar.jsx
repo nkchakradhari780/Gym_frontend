@@ -1,11 +1,9 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import axios from 'axios'
+import axios from 'axios';
 import styles from "./sidebar.module.css";
 import Image from 'next/image';
-
-
 import {
     MdDashboard,
     MdSupervisedUserCircle,
@@ -19,8 +17,7 @@ import {
     MdPersonOutline,
     MdLogout
 } from "react-icons/md";
-import MenuLink from './menuLink/menuLink'; // Import the MenuLink component
-
+import MenuLink from './menuLink/menuLink';
 
 const menuItems = [
     {
@@ -76,56 +73,56 @@ const menuItems = [
 ];
 
 const SidebarManager = () => {
-
     const [managerDetails, setManagerDetails] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchManagerDetails = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/manager', {
-          withCredentials: true,  // Send cookies with the request if needed
-        });
+    useEffect(() => {
+        const fetchManagerDetails = async () => {
+            try {
+                const response = await axios.get('http://localhost:3001/manager', {
+                    withCredentials: true,
+                });
 
-        if (response.data) {
-          console.log('Response Data Sidebar:', response.data); // Logs data from the backend
-          setManagerDetails(response.data.manager);
-        //   console.log('name:', response.data.manager.fullName)
-        //   console.log('role:', response.data.manager.role)
-        } else {
-          console.error('No data returned from API');
-          setError('No data returned from API');
+                if (response.data) {
+                    console.log('Response Data Sidebar:', response.data);
+                    setManagerDetails(response.data.manager);
+                } else {
+                    console.error('No data returned from API');
+                    setError('No data returned from API');
+                }
+            } catch (error) {
+                console.error('Error fetching manager details:', error.message);
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchManagerDetails();
+    }, []);
+
+    const handleLogout = async () => {
+        try {
+            await axios.post('http://localhost:3001/logout', {}, { withCredentials: true });
+            window.location.href = '/'; // Redirect to login or home page after logout
+        } catch (error) {
+            console.error('Error logging out:', error.message);
+            setError('Failed to log out');
         }
-      } catch (error) {
-        console.error('Error fetching manager details:', error.message);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
     };
 
-    fetchManagerDetails();
-  }, []);
-
-  // Monitor managerDetails state change
-  useEffect(() => {
-    if (managerDetails) {
-      // console.log('Manager Details:', managerDetails); // This will run when managerDetails updates
+    if (loading) {
+        return <p>Loading...</p>;
     }
-  }, [managerDetails]);
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
+    if (error) {
+        return <p>Error: {error}</p>;
+    }
 
-  if (error) {
-    return <p>Error: {error}</p>;
-  }
-
-  if (!managerDetails) {
-    return <p>No manager details found.</p>;
-  }
+    if (!managerDetails) {
+        return <p>No manager details found.</p>;
+    }
 
     return (
         <div className={styles.container}>
@@ -147,7 +144,7 @@ const SidebarManager = () => {
                     </li>
                 ))}
             </ul>
-            <button className={styles.logoutbtn}>
+            <button className={styles.logoutbtn} onClick={handleLogout}>
                 <MdLogout />
                 Logout
             </button>

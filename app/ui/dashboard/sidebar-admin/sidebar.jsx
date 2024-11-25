@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
 import { useEffect, useState } from 'react';
-import axios from 'axios'; // Import axios
+import axios from 'axios';
 import styles from "./sidebar.module.css";
 import Image from 'next/image';
-import MenuLink from './menuLink/menuLink'; // Import the MenuLink component
+import MenuLink from './menuLink/menuLink';
 
 import {
     MdDashboard,
@@ -19,8 +19,6 @@ import {
     MdPersonOutline,
     MdLogout
 } from "react-icons/md";
-
-
 
 const menuItems = [
     {
@@ -73,13 +71,9 @@ const menuItems = [
             },
         ],
     },
-   
 ];
 
-
-
 const SidebarAdmin = () => {
-
     const [adminDetails, setAdminDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -87,20 +81,20 @@ const SidebarAdmin = () => {
     useEffect(() => {
         const fetchAdminDetails = async () => {
             try{ 
-                const response = await axios.get('http://localhost:3001/owner',{
+                const response = await axios.get('http://localhost:3001/owner', {
                     withCredentials: true,
                 });
 
-                if(response.data){
-                    console.log('Response Data Sidebar:', response.data)
-                    setAdminDetails(response.data.owner)
+                if(response.data) {
+                    console.log('Response Data Sidebar:', response.data);
+                    setAdminDetails(response.data.owner);
                 } else {
-                    console.error('No data returned from API')
-                    setError('No data returned from API')
+                    console.error('No data returned from API');
+                    setError('No data returned from API');
                 }
             } catch (error) {
-                console.error('Error fetching Admin Details:',error.message)
-                setError(error.message)
+                console.error('Error fetching Admin Details:', error.message);
+                setError(error.message);
             } finally {
                 setLoading(false);
             }
@@ -109,24 +103,27 @@ const SidebarAdmin = () => {
         fetchAdminDetails();
     }, []);
 
-    useEffect(() => {
-        if(adminDetails){
-            console.log('Admin Details:', adminDetails)
+    const handleLogout = async () => {
+        try {
+            await axios.post('http://localhost:3001/logout', {}, { withCredentials: true });
+            window.location.href = '/'; // Redirect to login or home page after logout
+        } catch (error) {
+            console.error('Error logging out:', error.message);
+            setError('Failed to log out');
         }
-    }, [adminDetails])
+    };
 
     if(loading) {
-        return <p>Loading...</p>
+        return <p>Loading...</p>;
     }
 
     if(error) {
-        return <p>Error: {error}</p>
+        return <p>Error: {error}</p>;
     }
 
     if(!adminDetails) {
-        return <p>No Admin Details found</p>
+        return <p>No Admin Details found</p>;
     }
-
 
     return (
         <div className={styles.container}>
@@ -138,7 +135,7 @@ const SidebarAdmin = () => {
                 </div>
             </div>
 
-            <ul className={styles.list}> {/* Corrected className */}
+            <ul className={styles.list}>
                 {menuItems.map((cat) => (
                     <li key={cat.title}>
                         <span className={styles.cat}>{cat.title}</span>
@@ -148,7 +145,7 @@ const SidebarAdmin = () => {
                     </li>
                 ))}
             </ul>
-            <button className={styles.logoutbtn}>
+            <button className={styles.logoutbtn} onClick={handleLogout}>
                 <MdLogout />
                 Logout
             </button>

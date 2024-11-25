@@ -1,26 +1,33 @@
 "use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
-import styles from '@/app/ui/dashboard/managers/addManager/addManager.module.css';
-import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
-import Link from 'next/link';
+import { useState } from "react";
+import Image from "next/image";
+import styles from "@/app/ui/dashboard/managers/addManager/addManager.module.css";
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const AddManagerPage = () => {
-  const [selectedImage, setSelectedImage] = useState('/images/noavtar.png');
+  const router = useRouter();
+  const [selectedImage, setSelectedImage] = useState("/images/noavtar.png");
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    contact: '',
-    address: '',
-    age: '',
-    gender: '',
-    salary: '',
-    joinDate: '',
-    status: 'Active',
+    fullName: "",
+    email: "",
+    password: "",
+    contact: "",
+    address: "",
+    age: "",
+    gender: "",
+    salary: "",
+    joinDate: "",
+    aadharNo: "", // Add aadharNo in formData
+    status: "Active",
+    managerId: "",
   });
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -35,9 +42,53 @@ const AddManagerPage = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Handle form submission logic (e.g., API call)
+    const {
+      fullName,
+      email,
+      password,
+      contact,
+      address,
+      age,
+      gender,
+      salary,
+      joinDate,
+      aadharNo,
+      status,
+    } = formData;
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3001/owner/manager/create",
+        {
+          fullName,
+          email,
+          password,
+          contact,
+          address,
+          age,
+          gender,
+          salary,
+          joinDate,
+          aadharNo, // Include aadharNo in the request
+          status,
+          managerId,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      router.push("/dashboard-admin/manager");
+      setSuccess(true);
+      setError("");
+      alert("Manager Added successfully");
+    } catch (error) {
+      setError("Error adding manager");
+      setSuccess(false);
+      alert("Failed to add Manager");
+      console.error("Error adding manager", error.message);
+    }
   };
 
   return (
@@ -61,30 +112,37 @@ const AddManagerPage = () => {
         <label htmlFor="file-upload" className={styles.customFileUpload}>
           Choose File
         </label>
+
         <div className={styles.formContainer}>
           <form onSubmit={handleSubmit} className={styles.form}>
-            <label>Username <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Full Name <span className={styles.requiredStar}>*</span>
+            </label>
             <input
-              type='text'
-              name='username'
+              type="text"
+              name="fullName"
               placeholder="Full Name"
               value={formData.fullName}
               onChange={handleChange}
               required
             />
-            <label>Email <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Email <span className={styles.requiredStar}>*</span>
+            </label>
             <input
-              type='email'
-              name='email'
+              type="email"
+              name="email"
               value={formData.email}
               onChange={handleChange}
               required
             />
-            <label>Password <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Password <span className={styles.requiredStar}>*</span>
+            </label>
             <div className={styles.passwordContainer}>
               <input
-                type={showPassword ? 'text' : 'password'}
-                name='password'
+                type={showPassword ? "text" : "password"}
+                name="password"
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -99,33 +157,41 @@ const AddManagerPage = () => {
                 {showPassword ? <AiFillEye /> : <AiFillEyeInvisible />}
               </span>
             </div>
-            <label>Contact <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Contact <span className={styles.requiredStar}>*</span>
+            </label>
             <input
-              type='text'
-              name='contact'
+              type="text"
+              name="contact"
               pattern="\d{10}"
               placeholder="10-digit contact number"
               value={formData.contact}
               onChange={handleChange}
               required
             />
-            <label>Address <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Address <span className={styles.requiredStar}>*</span>
+            </label>
             <input
-              type='text'
-              name='address'
+              type="text"
+              name="address"
               value={formData.address}
               onChange={handleChange}
               required
             />
-            <label>Age<span className={styles.requiredStar}>*</span></label>
+            <label>
+              Age <span className={styles.requiredStar}>*</span>
+            </label>
             <input
-              type='text'
-              name='age'
-              value={formData.dob}
+              type="text"
+              name="age"
+              value={formData.age}
               onChange={handleChange}
               required
             />
-             <label>Salary(₹) <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Salary(₹) <span className={styles.requiredStar}>*</span>
+            </label>
             <input
               type="number"
               name="salary"
@@ -136,21 +202,33 @@ const AddManagerPage = () => {
               required
             />
             <div className={styles.dateTotalContainer}>
-              <div>
-                <label htmlFor="joinDate">Joining Date:</label>
-                <input
-                  type="date"
-                  id="joinDate"
-                  name="joinDate"
-                  value={formData.joinDate}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              
+              <label htmlFor="joinDate">Joining Date:</label>
+              <input
+                type="date"
+                id="joinDate"
+                name="joinDate"
+                value={formData.joinDate}
+                onChange={handleChange}
+                required
+              />
             </div>
-           
-           <label>Status <span className={styles.requiredStar}>*</span></label>
+
+            <label>
+              Aadhar Number <span className={styles.requiredStar}>*</span>
+            </label>
+            <input
+              type="text"
+              name="aadharNo"
+              value={formData.aadharNo}
+              onChange={handleChange}
+              pattern="\d{12}" // Validates a 12-digit Aadhar number
+              placeholder="12-digit Aadhar Number"
+              required
+            />
+
+            <label>
+              Status <span className={styles.requiredStar}>*</span>
+            </label>
             <select
               name="status"
               value={formData.status}
@@ -162,7 +240,9 @@ const AddManagerPage = () => {
               <option value="on_leave">On Leave</option>
             </select>
 
-              <button type="button" className={styles.updateButton}>Submit</button>
+            <button type="submit" className={styles.updateButton}>
+              Submit
+            </button>
           </form>
         </div>
       </div>

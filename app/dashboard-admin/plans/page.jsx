@@ -1,79 +1,67 @@
-'use client'
+'use client';
 
 import styles from '@/app/ui/dashboard/plans/plans.module.css';
 import Search from '@/app/ui/dashboard/search/search';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const PlanPage = () => {
-    const [planData, setPlanData] = useState([
-        {
-            title: 'Free',
-            level: 'Basic',
-            price: '₹ 0/month',
-            category: 'Personal',
-            duration: '6 months',
-            dateCreated: '15-01-2023',
-            facilities: [
-                'Use your own browser',
-                'Use your own OpenAI key',
-                'Data export',
-                'Basic support',
-                'Scheduled jobs',
-                'Smart downloader and cost-optimized AI',
-                'Dedicated server'
-            ],
-            isDisabled: [4, 5, 6] // Indexes for disabled features
-        },
-        {
-            title: 'Cloud',
-            level: 'Intermediate',
-            price: '₹ 2000/month',
-            category: 'Hobbyist',
-            duration: '1 year',
-            dateCreated: '26-02-2023',
-            facilities: [
-                'Use our servers',
-                'Use our specialized AI',
-                'Data export',
-                'Full support',
-                'Scheduled jobs',
-                'Smart downloader and cost-optimized AI',
-                'Dedicated server'
-            ],
-            isDisabled: [5, 6]
-        },
-        {
-            title: 'Enterprise',
-            level: 'Advanced',
-            price: '₹ 5000/month',
-            category: 'Professional',
-            duration: '1 year',
-            dateCreated: '03-05-2024',
-            facilities: [
-                'Your own server',
-                'Use our specialized AI',
-                'Data export',
-                'Premium support',
-                'Scheduled jobs',
-                'Smart downloader and cost-optimized AI',
-                'Dedicated server'
-            ],
-            isDisabled: []
+    const [planList, setPlanList] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchPlansList = async () => {
+            try {
+                const response = await axios.get('http://localhost:3001/owner/plans', {
+                    withCredentials: true,
+                });
+                if (response.data && response.data.plans) {
+                    console.log('Response Data Plans:', response.data.plans);
+                    setPlanList(response.data.plans);
+                } else {
+                    console.log("Error Fetching Plans List", error.message);
+                    setError("Error Fetching Plans List");
+                }
+            } catch (error) {
+                console.error("Error fetching plans:", error.message);
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPlansList();
+    }, []);
+
+    const handleDelete = async (index, planId) => {
+        const isConfirmed = window.confirm("Are you sure you want to delete this plan?");
+        if (!isConfirmed) {
+            return;
         }
-    ]);
 
-    const handleUpdate = (index) => {
-        // Handle update logic here
-        console.log(`Update plan at index: ${index}`);
+        try {
+            await axios.delete(`http://localhost:3001/owner/plans/${planId}`, {
+                withCredentials: true,
+            });
+            const updatedPlans = planList.filter((_, i) => i !== index);
+            setPlanList(updatedPlans);
+            alert("Plan deleted successfully");
+        } catch (error) {
+            console.error(`Error deleting plan with ID ${planId}:`, error.message);
+            setError(`Error deleting plan: ${error.message}`);
+            alert("Failed to delete plan. Please try again.");
+        }
     };
 
-    const handleDelete = (index) => {
-        // Create a new array without the deleted plan
-        const updatedPlans = planData.filter((_, i) => i !== index);
-        setPlanData(updatedPlans); // Update the state with the new array
-        console.log(`Deleted plan at index: ${index}`);
-    };
+    if (loading) {
+        return <div>Loading...</div>
+    }
+
+    if (error) {
+        return <div>Error: {error}</div>
+    }
 
     return (
         <div className={styles.plansContainer}>
@@ -85,9 +73,10 @@ const PlanPage = () => {
             </div>
             <h2 className={styles.title}>Pricing Plans</h2>
             <div className={styles.cards}>
-                {planData.map((plan, index) => (
+                {planList.map((plan, index) => (
                     <div key={index} className={styles.card}>
-                        <h3 className={styles.planTitle}>{plan.title}</h3>
+                        <h3 className={styles.planTitle}>{plan.planName}</h3>
+                        <h4 className='' >{plan.planID}</h4>
                         <p className={styles.level}>{plan.level}</p>
                         <p className={styles.price}>{plan.price}</p>
                         <p className={styles.category}>Category: {plan.category}</p>
@@ -95,20 +84,28 @@ const PlanPage = () => {
                         <p className={styles.dateCreated}>Date Created: {plan.dateCreated}</p>
                         <ul className={styles.facilities}>
                             {plan.facilities.map((facility, i) => (
-                                <li key={i} className={plan.isDisabled.includes(i) ? styles.disabled : styles.enabled}>
+                                <li
+                                    key={i}
+                                    className={
+                                        plan.isDisabled && plan.isDisabled.includes(i)
+                                            ? styles.disabled
+                                            : styles.enabled
+                                    }
+                                >
                                     {facility}
                                 </li>
                             ))}
                         </ul>
                         <div className={styles.buttonContainer}>
-                            <Link href={`/dashboard-admin/plans/${plan.id}`}>
+                            <Link href={`/dashboard-admin/plans/update/${plan._id}`}>
                                 <button className={styles.updateButton}>
                                     Update
                                 </button>
                             </Link>
                             <button 
                                 className={styles.deleteButton} 
-                                onClick={() => handleDelete(index)}>
+                                onClick={() => handleDelete(index, plan._id)}
+                            >
                                 Delete
                             </button>
                         </div>

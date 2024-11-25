@@ -1,46 +1,84 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import axios from "axios";
 import styles from "@/app/ui/dashboard/attendance/attendance.module.css";
 
 const AttendanceAdPage = () => {
   const [trainerAttendance, setTrainerAttendance] = useState([]);
   const [customerAttendance, setCustomerAttendance] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // UseEffect to set the current date initially
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
     setSelectedDate(today);
-
-    // Fetch trainers
-    fetch("http://localhost:3001/trainers") // Replace with your trainers API endpoint
-      .then((response) => response.json())
-      .then((data) => {
-        const trainersData = data.map((trainer) => ({
-          id: trainer.id,
-          name: trainer.name,
-          status: null,
-        }));
-        setTrainerAttendance(trainersData);
-      })
-      .catch((error) => console.error("Error fetching trainers:", error));
-
-    // Fetch customers
-    fetch("http://localhost:3001/customers") // Replace with your customers API endpoint
-      .then((response) => response.json())
-      .then((data) => {
-        const customersData = data.map((customer) => ({
-          id: customer.id,
-          name: customer.name,
-          status: null,
-        }));
-        setCustomerAttendance(customersData);
-      })
-      .catch((error) => console.error("Error fetching customers:", error));
   }, []);
 
+  // UseEffect to fetch data when selectedDate is set
+  useEffect(() => {
+    const fetchCustomerList = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3001/owner/customer/attendance/list",
+          { withCredentials: true }
+        );
+
+        console.log('Customer Attendence:',response.data);
+        if (response.data && response.data.attendanceData) {
+          setCustomerAttendance(
+            response.data.attendanceData.map((attendanceData) => ({
+              id: attendanceData.customerId,
+              name: attendanceData.name,
+              status: null, // Default status
+              date: selectedDate,
+            }))
+          );
+        } else {
+          setError("No customer data returned from API");
+        }
+      } catch (error) {
+        console.error("Error fetching customer list:", error.message);
+        setError(error.message);
+      }
+    };
+
+    const fetchTrainersList = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3001/owner/trainer",
+          { withCredentials: true }
+        );
+        console.log("Trainer List:", response.data.trainers);
+        if (response.data && response.data.trainers) {
+          setTrainerAttendance(
+            response.data.trainers.map((trainer) => ({
+              id: trainer._id,
+              name: trainer.fullName,
+              status: null, // Default status
+              date: selectedDate, // Using the updated selectedDate
+            }))
+          );
+        } else {
+          setError("No trainer data returned from API");
+        }
+      } catch (error) {
+        console.error("Error fetching trainer list:", error.message);
+        setError(error.message);
+      }
+    };
+
+    if (selectedDate) {
+      setLoading(true);
+      Promise.all([fetchCustomerList(), fetchTrainersList()])
+        .finally(() => setLoading(false));
+    }
+  }, [selectedDate]); // Depend on selectedDate to re-fetch data when it changes
+
   const handleDateChange = (e) => {
+    console.log("Selected Date:", e.target.value); // Log selected date change
     setSelectedDate(e.target.value);
   };
 
@@ -57,12 +95,16 @@ const AttendanceAdPage = () => {
     }
   };
 
-  const handleSubmit = () => {
-    setSubmitted(true);
-    console.log("Attendance submitted for date:", selectedDate);
+  const handleTrainerSubmit = () => {
+    console.log("Trainer attendance submitted for date:", selectedDate);
     console.log("Trainer attendance data:", trainerAttendance);
+    // Submit trainers' attendance to the backend here
+  };
+
+  const handleCustomerSubmit = () => {
+    console.log("Customer attendance submitted for date:", selectedDate);
     console.log("Customer attendance data:", customerAttendance);
-    // Here you can add the code to submit the data to your backend
+    // Submit customers' attendance to the backend here
   };
 
   const renderTable = (data, type) => (
@@ -83,7 +125,7 @@ const AttendanceAdPage = () => {
               <button
                 className={styles.presentButton}
                 onClick={() => markAttendance(person.id, "Present", type)}
-                disabled={submitted || person.status === "Present"}
+                disabled={person.status === "Present"}
               >
                 Present
               </button>
@@ -92,16 +134,14 @@ const AttendanceAdPage = () => {
               <button
                 className={styles.absentButton}
                 onClick={() => markAttendance(person.id, "Absent", type)}
-                disabled={submitted || person.status === "Absent"}
+                disabled={person.status === "Absent"}
               >
                 Absent
               </button>
             </td>
             <td>
               <Link href={`/dashboard-admin/attendance/singleAttendance`}>
-                <button className={styles.viewButton} disabled={submitted}>
-                  View
-                </button>
+                <button className={styles.viewButton}>View</button>
               </Link>
             </td>
           </tr>
@@ -109,6 +149,14 @@ const AttendanceAdPage = () => {
       </tbody>
     </table>
   );
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
 
   return (
     <div className={styles.container}>
@@ -122,25 +170,40 @@ const AttendanceAdPage = () => {
           value={selectedDate}
           onChange={handleDateChange}
           className={styles.dateInput}
-          disabled={submitted}
         />
       </div>
 
+      {/* Trainers Attendance Table */}
       <h2 className={styles.sectionTitle}>Trainers</h2>
-      {renderTable(trainerAttendance, "trainer")}
+      {trainerAttendance.length > 0 ? (
+        <>
+          {renderTable(trainerAttendance, "trainer")}
+          <button
+            className={styles.submitButton}
+            onClick={handleTrainerSubmit}
+          >
+            Submit Trainer Attendance
+          </button>
+        </>
+      ) : (
+        <p>No trainers available.</p>
+      )}
 
+      {/* Customers Attendance Table */}
       <h2 className={styles.sectionTitle}>Customers</h2>
-      {renderTable(customerAttendance, "customer")}
-
-      <div>
-        <button
-          className={styles.submitButton}
-          onClick={handleSubmit}
-          disabled={submitted}
-        >
-          Submit Attendance
-        </button>
-      </div>
+      {customerAttendance.length > 0 ? (
+        <>
+          {renderTable(customerAttendance, "customer")}
+          <button
+            className={styles.submitButton}
+            onClick={handleCustomerSubmit}
+          >
+            Submit Customer Attendance
+          </button>
+        </>
+      ) : (
+        <p>No customers available.</p>
+      )}
     </div>
   );
 };

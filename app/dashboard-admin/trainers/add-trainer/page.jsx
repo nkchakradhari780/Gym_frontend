@@ -9,7 +9,7 @@ import { useParams, useRouter } from "next/navigation";
 
 const AddTrainerPage = () => {
   const router = useRouter();
-  const  {id} = useParams();
+  const { id } = useParams();
 
   const [selectedImage, setSelectedImage] = useState("/images/noavtar.png");
   const [showPassword, setShowPassword] = useState(false);
@@ -60,7 +60,7 @@ const AddTrainerPage = () => {
       speciality,
       salary,
       joiningDate,
-      isActive,
+      status,
     } = formData;
 
     try {
@@ -79,13 +79,13 @@ const AddTrainerPage = () => {
           speciality,
           salary,
           joiningDate,
-          isActive,
+          status,
         },
         {
           withCredentials: true,
         }
       );
-      router.push('/dashboard-admin/trainers')
+      router.push("/dashboard-admin/trainers");
       alert("Trainer added successfully");
       setSuccess(true);
       setError("");
@@ -249,14 +249,18 @@ const AddTrainerPage = () => {
               onChange={handleChange}
               required
             />
-            <label>Is Active?</label>
+            <label>
+              Status <span className={styles.requiredStar}>*</span>
+            </label>
             <select
-              name="isActive"
-              value={formData.isActive}
+              name="status"
+              value={formData.status}
               onChange={handleChange}
+              required
             >
-              <option value="true">Yes</option>
-              <option value="false">No</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="on_leave">On Leave</option>
             </select>
             <button type="submit" className={styles.updateButton}>
               Add Trainer

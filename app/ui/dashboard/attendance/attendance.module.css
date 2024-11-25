@@ -80,6 +80,7 @@
   cursor: pointer;
   transition: background-color 0.3s ease; /* Smooth transition */
   margin-top: 20px; /* Ensure space above the button */
+  margin-bottom: 20px;
 }
 
 .submitButton:hover {

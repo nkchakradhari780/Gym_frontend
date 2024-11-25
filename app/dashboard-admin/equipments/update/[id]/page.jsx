@@ -65,6 +65,7 @@ const UpdateEquipmentPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
+      console.log("Id:",id);
       await axios.put(`http://localhost:3001/owner/equipment/${id}`, formData, {
         withCredentials: true,
       });
@@ -148,13 +149,16 @@ const UpdateEquipmentPage = () => {
             required
           />
           <label>Status</label>
-          <input
-            type="text"
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            required
-          />
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+            >
+              <option value="Available">Available</option>
+              <option value="In Use">In Use</option>
+              <option value="Under Maintenance">Under Maintenance</option>
+              <option value="Out of Order">Out of Order</option>
+            </select>
           <label>Description</label>
           <textarea
             name="description"

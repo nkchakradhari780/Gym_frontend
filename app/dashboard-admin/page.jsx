@@ -11,9 +11,9 @@ const DashboardAdmin = () => {
     <div className={styles.wrapper}>
       <div className={styles.main}>
         <div className={styles.cards}>
-          <Card />
-          <Card />
-          <Card />
+        <Card title="Total Users" number={10} />
+          <Card title="Active Users" number={5} />
+          <Card title="New Signups" number={3} />
         </div>
         <Transactions />
         <Chart />

@@ -18,6 +18,27 @@ const ManagerPage = () => {
         setIsActive(!isActive);
     };
 
+    // Function to delete a manager
+    const deleteManager = async (managerId) => {
+        if (window.confirm("Are you sure you want to delete this manager?")) {
+            try {
+                // Make a DELETE request to the server
+                const response = await axios.delete(`http://localhost:3001/owner/manager/${managerId}`, {
+                    withCredentials: true,
+                });
+
+                if (response.status === 200) {
+                    // Remove the deleted manager from the state
+                    setManagerList(managerList.filter(manager => manager._id !== managerId));
+                    alert("Manager deleted successfully");
+                }
+            } catch (error) {
+                setError("Error deleting manager");
+                console.error("Error deleting manager:", error);
+            }
+        }
+    };
+
     useEffect(() => {
         const fetchManagerList = async () => {
             try {
@@ -102,7 +123,12 @@ const ManagerPage = () => {
                                         <Link href={`/dashboard-admin/manager/update/${manager._id}`}>
                                             <button className={`${styles.button} ${styles.View}`}>View</button>
                                         </Link>
-                                        <button className={`${styles.button} ${styles.Delete}`}>Delete</button>
+                                        <button
+                                            className={`${styles.button} ${styles.Delete}`}
+                                            onClick={() => deleteManager(manager._id)} // Call the delete function on button click
+                                        >
+                                            Delete
+                                        </button>
                                     </div>
                                 </td>
                             </tr>

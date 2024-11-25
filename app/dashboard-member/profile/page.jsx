@@ -1,37 +1,64 @@
+'use client';
+
 import Image from 'next/image';
 import styles from '@/app/ui/dashboard/member-profile/member-profile.module.css';
+import axios from 'axios';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 
 const MemberProfile = () => {
-  const memberDetails = {
-    username: 'nisha_saw',
-    email: 'nisha@example.com',
-    password: '********',
-    contact: '1234567890',
-    address: '123 Main St, Bhilai, India',
-    dob: '20/08/2000',
-    gender: 'Female',
-    weight:'50',
-    plan: 'Modal Mode',
-    purchaseDate: '01-01-2023',
-    expireDate: '01-01-2024',
-    imageUrl: '/images/noavtar.png',
-  };
+  const {id} = useParams();
+
+  const [memberDetails, setMemberDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchMemberDetails = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/customer/profile',{
+          withCredentials: true,
+        }); // Update with the correct route
+        if(response.data) {
+          console.log('Response Data:', response.data.customer);
+          setMemberDetails(response.data.customer)
+        } else {
+          console.error('No data returned from API')
+          setError('No data returned from API')
+        }
+      } catch (error) {
+        console.error('Error fetching member details:', error);
+      } finally {
+        setLoading(false)
+      }
+    };
+
+    fetchMemberDetails();
+  }, []);
+
+  if(loading) {
+    return <p>Loading...</p>
+  }
+
+  if(error) {
+    return <p>Error: {error}</p>
+  }
 
   return (
     <div className={styles.container}>
       <h1>Your Profile:</h1>
       <div className={styles.profile_card}>
         <Image 
-          src={memberDetails.imageUrl} 
-          alt=''
+          src={memberDetails.imageUrl || '/images/noavtar.png'} 
+          alt="Profile Picture"
           className={styles.profile_image} 
-          width={150} // Set the width you need
-          height={150} // Set the height you need
-          objectFit="cover" // To maintain aspect ratio
+          width={150} 
+          height={150} 
+          objectFit="cover" 
         />
         <div className={styles.field}>
           <h2>Username:</h2>
-          <p>{memberDetails.username}</p>
+          <p>{memberDetails.fullName}</p>
         </div>
         <div className={styles.field}>
           <h2>Email:</h2>
@@ -46,8 +73,8 @@ const MemberProfile = () => {
           <p>{memberDetails.address}</p>
         </div>
         <div className={styles.field}>
-          <h2>Date of Birth:</h2>
-          <p>{memberDetails.dob}</p>
+          <h2>Age:</h2>
+          <p>{memberDetails.age}</p>
         </div>
         <div className={styles.field}>
           <h2>Gender:</h2>
@@ -57,18 +84,7 @@ const MemberProfile = () => {
           <h2>Weight:</h2>
           <p>{memberDetails.weight}</p>
         </div>
-        <div className={styles.field}>
-          <h2>Plan:</h2>
-          <p>{memberDetails.plan}</p>
-        </div>
-        <div className={styles.field}>
-          <h2>Purchase Date:</h2>
-          <p>{memberDetails.purchaseDate}</p>
-        </div>
-        <div className={styles.field}>
-          <h2>Expire Date:</h2>
-          <p>{memberDetails.expireDate}</p>
-        </div>
+        
       </div>
     </div>
   );

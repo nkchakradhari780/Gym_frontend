@@ -43,13 +43,13 @@ const EquipmentPage = () => {
       setEquipmentsList((prevEquipments) =>
         prevEquipments.map((equipment) =>
           equipment._id === id
-            ? { ...equipment, isAvailable: updatedStatus }
+            ? { ...equipment, status: updatedStatus }
             : equipment
         )
       );
       await axios.put(
         `http://localhost:3001/owner/equipment/${id}`,
-        { isAvailable: updatedStatus },
+        { status: updatedStatus },
         { withCredentials: true }
       );
     } catch (error) {
@@ -58,10 +58,34 @@ const EquipmentPage = () => {
       setEquipmentsList((prevEquipments) =>
         prevEquipments.map((equipment) =>
           equipment._id === id
-            ? { ...equipment, isAvailable: currentStatus }
+            ? { ...equipment, status: currentStatus }
             : equipment
         )
       );
+    }
+  };
+
+  const deleteEquipment = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this equipment?");
+    if (!confirmDelete) return;
+
+    try {
+      const response = await axios.delete(`http://localhost:3001/owner/equipment/${id}`, {
+        withCredentials: true,
+      });
+
+      if (response.status === 200) {
+        // Remove the deleted equipment from the state
+        setEquipmentsList((prevEquipments) =>
+          prevEquipments.filter((equipment) => equipment._id !== id)
+        );
+        alert("Equipment deleted successfully");
+      } else {
+        alert("Failed to delete the equipment");
+      }
+    } catch (error) {
+      console.error("Error deleting equipment", error.message);
+      setError("Failed to delete equipment");
     }
   };
 
@@ -118,13 +142,13 @@ const EquipmentPage = () => {
                 <td>
                   <button
                     className={`${styles.button} ${
-                      equipment.isAvailable ? styles.active : styles.inactive
+                      equipment.status ? styles.active : styles.inactive
                     }`}
                     onClick={() =>
-                      toggleStatus(equipment._id, equipment.isAvailable)
+                      toggleStatus(equipment._id, equipment.status)
                     }
                   >
-                    {equipment.isAvailable ? "Available" : "Unavailable"}
+                    {equipment.status ? "Available" : "Unavailable"}
                   </button>
                 </td>
                 <td>
@@ -136,7 +160,10 @@ const EquipmentPage = () => {
                         Update
                       </button>
                     </Link>
-                    <button className={`${styles.button} ${styles.Delete}`}>
+                    <button
+                      className={`${styles.button} ${styles.Delete}`}
+                      onClick={() => deleteEquipment(equipment._id)}
+                    >
                       Delete
                     </button>
                   </div>

@@ -1,80 +1,60 @@
 'use client';
 import { useState, useEffect } from 'react';
 import styles from '@/app/ui/dashboard/my-plan/my-plan.module.css';
+import axios from 'axios';
 
 const PlanListPage = () => {
-  const [currentPlan, setCurrentPlan] = useState(null);
   const [purchasedPlans, setPurchasedPlans] = useState([]);
-  const [expiredPlans, setExpiredPlans] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const response = await fetch('/api/plans'); // Replace with your API endpoint
-        const data = await response.json();
+        const response = await axios.get('http://localhost:3001/customer/purchesedPlans', {
+          withCredentials: true,
+        });
 
-        const current = data.filter(plan => plan.status === 'current');
-        const purchased = data.filter(plan => plan.status === 'purchased');
-        const expired = data.filter(plan => plan.status === 'expired');
+        console.log(response.data);
 
-        setCurrentPlan(current[0]);
-        setPurchasedPlans(purchased);
-        setExpiredPlans(expired);
+        if (response.data?.length > 0) {
+          setPurchasedPlans(response.data);
+        } else {
+          setError('No purchased plans available.');
+        }
       } catch (error) {
         console.error('Error fetching plans:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchPlans();
   }, []);
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
     <div className={styles.plansContainer}>
-      {/* Current Plan */}
-      <h3 className={styles.planTitle}>Current Plan</h3>
-      <div className={styles.card}>
-        {currentPlan ? (
-          <div className={styles.planDetails}>
-            <p><strong>Name:</strong> {currentPlan.name}</p>
-            <p><strong>Start Date:</strong> {currentPlan.startDate}</p>
-            <p><strong>End Date:</strong> {currentPlan.endDate}</p>
-            <p><strong>Facilities:</strong> {currentPlan.facilities.join(', ')}</p>
-          </div>
-        ) : (
-          <p>No current plan available.</p>
-        )}
-      </div>
-
-      {/* All Purchased Plans */}
       <h3 className={styles.planTitle}>All Purchased Plans</h3>
       <div className={styles.card}>
-        {purchasedPlans.length > 0 ? (
-          purchasedPlans.map((plan, index) => (
-            <div key={index} className={styles.planDetails}>
-              <p><strong>Name:</strong> {plan.name}</p>
-              <p><strong>Purchase Date:</strong> {plan.purchaseDate}</p>
-              <p><strong>Facilities:</strong> {plan.facilities.join(', ')}</p>
-            </div>
-          ))
-        ) : (
-          <p>No purchased plans available.</p>
-        )}
-      </div>
-
-      {/* Expired Plans */}
-      <h3 className={styles.planTitle}>Expired Plans</h3>
-      <div className={styles.card}>
-        {expiredPlans.length > 0 ? (
-          expiredPlans.map((plan, index) => (
-            <div key={index} className={styles.planDetails}>
-              <p><strong>Name:</strong> {plan.name}</p>
-              <p><strong>Expiry Date:</strong> {plan.expiryDate}</p>
-              <p><strong>Facilities:</strong> {plan.facilities.join(', ')}</p>
-            </div>
-          ))
-        ) : (
-          <p>No expired plans.</p>
-        )}
+        {purchasedPlans.map((plan, index) => (
+          <div key={index} className={styles.planDetails}>
+            <p><strong>Name:</strong> {plan.planName}</p>
+            <p><strong>Facilities:</strong> {plan.facilities?.join(', ') || 'Not provided'}</p>
+            <p><strong>Duration:</strong> {plan.duration || 'Not specified'}</p>
+            <p><strong>Level:</strong> {plan.level || 'Not specified'}</p>
+            <p><strong>Category:</strong> {plan.category || 'Not specified'}</p>
+            <p><strong>Price:</strong> ${plan.price || 'Not specified'}</p>
+          </div>
+        ))}
       </div>
     </div>
   );

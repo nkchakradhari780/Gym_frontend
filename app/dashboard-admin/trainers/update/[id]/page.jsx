@@ -105,7 +105,7 @@ const SingleTrainerPage = () => {
   };
 
   if (loading) {
-    return <div>Loadingl...</div>
+    return <div>Loading...</div>
   }
 
   if (error) {
@@ -225,7 +225,7 @@ const SingleTrainerPage = () => {
               required
             />
             <div className={styles.dateTotalContainer}>
-              <div>
+              <div> 
                 <label htmlFor="joiningDate">Joining Date</label>
                 <input
                   type="date"
