@@ -44,7 +44,7 @@ const SingleUserPage = () => {
     const fetchUserDetails = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/owner/customer/${id}`,
+          `http://localhost:3001/manager/customer/${id}`,
           { withCredentials: true }
         );
 
@@ -86,14 +86,14 @@ const SingleUserPage = () => {
     event.preventDefault();
     try {
       const response = await axios.put(
-        `http://localhost:3001/owner/customer/update`,
+        `http://localhost:3001/manager/customer/update`,
         formData,
         { withCredentials: true }
       );
 
       if (response.status === 200) {
         console.log("Customer updated successfully");
-        router.push("/dashboard-admin/users");
+        router.push("/dashboard-manager/users");
       }
     } catch (error) {
       console.error("Error updating customer:", error);

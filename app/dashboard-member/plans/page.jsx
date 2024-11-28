@@ -13,7 +13,7 @@ const PlanMemberPage = () => {
     useEffect(() => {
         const fetchPlansList = async () => {
             try {
-                const response = await axios.get("http://localhost:3001/customer/plans/list", {
+                const response = await axios.get("http://localhost:3001/customer/plans/list ", {
                     withCredentials: true,
                 });
 

@@ -1,28 +1,29 @@
 "use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
-import styles from '@/app/ui/dashboard/users/addUser/addUser.module.css';
-import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
-import Link from 'next/link';
+import { useState } from "react";
+import Image from "next/image";
+import styles from "@/app/ui/dashboard/users/addUser/addUser.module.css";
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import Link from "next/link";
+import axios from "axios";
 
 const AddUserPage = () => {
-  const [selectedImage, setSelectedImage] = useState('/images/noavtar.png');
+  const [selectedImage, setSelectedImage] = useState("/images/noavatar.png");
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    contact: '',
-    address: '',
-    dob: '',
-    gender:'',
-    weight: '',
-    plan:"",
-    purchaseDate:"",
-    expireDate:'',
-    isActive: true,
+    fullName: "",
+    email: "",
+    password: "",
+    contact: "",
+    address: "",
+    weight: "",
+    age: "",
+    startDate: "",
+    gender: "",
   });
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -37,9 +38,50 @@ const AddUserPage = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Handle form submission logic (e.g., API call)
+
+    const {
+      fullName,
+      email,
+      password,
+      contact,
+      address,
+      weight,
+      age,
+      startDate,
+      gender,
+    } = formData;
+
+    try {
+      console.log("Creating new Member with", formData);
+
+      const response = await axios.post(
+        "http://localhost:3001/manager/customer/create",
+        {
+          fullName,
+          email,
+          password,
+          contact,
+          address,
+          weight,
+          age,
+          startDate,
+          gender,
+        },
+        {
+          withCredentials: true,
+        }
+      ); // Adjust API URL if needed
+      alert("User added successfully");
+      setSuccess(true);
+      setError("");
+    } catch (error) {
+      setError("Error adding user")
+      setSuccess(false)
+      console.error("Error adding user:", error.message);
+      alert("Failed to add user");
+    }
   };
 
   return (
@@ -47,7 +89,7 @@ const AddUserPage = () => {
       <div className={styles.infoContainer}>
         <div className={styles.imgContainer}>
           <Image
-            src={selectedImage}
+            src={selectedImage} 
             alt="User Avatar"
             layout="fill"
             objectFit="cover"
@@ -65,28 +107,34 @@ const AddUserPage = () => {
         </label>
         <div className={styles.formContainer}>
           <form onSubmit={handleSubmit} className={styles.form}>
-            <label>Username <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Full Name <span className={styles.requiredStar}>*</span>
+            </label>
             <input
-              type='text'
-              name='username'
+              type="text"
+              name="fullName"
               placeholder="Full Name"
-              value={formData.username}
+              value={formData.fullName}
               onChange={handleChange}
               required
             />
-            <label>Email <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Email <span className={styles.requiredStar}>*</span>
+            </label>
             <input
-              type='email'
-              name='email'
+              type="email"
+              name="email"
               value={formData.email}
               onChange={handleChange}
               required
             />
-            <label>Password <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Password <span className={styles.requiredStar}>*</span>
+            </label>
             <div className={styles.passwordContainer}>
               <input
-                type={showPassword ? 'text' : 'password'}
-                name='password'
+                type={showPassword ? "text" : "password"}
+                name="password"
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -101,80 +149,91 @@ const AddUserPage = () => {
                 {showPassword ? <AiFillEye /> : <AiFillEyeInvisible />}
               </span>
             </div>
-            <label>Contact <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Contact <span className={styles.requiredStar}>*</span>
+            </label>
             <input
-              type='text'
-              name='contact'
+              type="text"
+              name="contact"
               pattern="\d{10}"
               placeholder="10-digit contact number"
               value={formData.contact}
               onChange={handleChange}
               required
             />
-            <label>Address <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Address <span className={styles.requiredStar}>*</span>
+            </label>
             <input
-              type='text'
-              name='address'
+              type="text"
+              name="address"
               value={formData.address}
               onChange={handleChange}
               required
             />
-            <label>Date of Birth <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Age <span className={styles.requiredStar}>*</span>
+            </label>
             <input
-              type='date'
-              name='dob'
-              value={formData.dob}
+              type="number"
+              name="age"
+              min="0"
+              placeholder="Enter age"
+              value={formData.age}
               onChange={handleChange}
               required
             />
-            <label>Gender <span className={styles.requiredStar}>*</span></label>
-            <select name="cat" id="cat" required>
-          <option value="" disabled selected>Choose Gender</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="other">Other</option>
-        </select>
-            <label>Weight (kg) <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Gender <span className={styles.requiredStar}>*</span>
+            </label>
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                Choose Gender
+              </option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+            <label>
+              Weight (kg) <span className={styles.requiredStar}>*</span>
+            </label>
             <input
-              type='number'
-              name='weight'
+              type="number"
+              name="weight"
               min="0"
               step="0.1"
               value={formData.weight}
               onChange={handleChange}
               required
             />
-            <label>Plan<span className={styles.requiredStar}>*</span></label>
-            <select name="catg" id="catg" required>
-          <option value="" disabled selected>Choose Plan</option>
-          <option value="plan1">Plan 1</option>
-          <option value="paln2">Plan 2</option>
-          <option value="plan3">Plan 3</option>
-        </select>
-        <div className={styles.dateTotalContainer}>
-          <div>
-            <label htmlFor="purchaseDate">Purchase Date:</label>
-            <input type="date" id="purchaseDate" name="purchaseDate" required />
-          </div>
+            <label>
+              Start Date <span className={styles.requiredStar}>*</span>
+            </label>
+            <input
+              type="date"
+              name="startDate"
+              value={formData.startDate}
+              onChange={handleChange}
+              required
+            />
 
-          <div>
-            <label htmlFor="expireDate">Expire Date:</label>
-            <input type="date" id="expireDate" name="expireDate" required />
-          </div>
-        </div>
             <label>Is Active?</label>
             <select
-              name='isActive'
+              name="isActive"
               value={formData.isActive}
               onChange={handleChange}
             >
               <option value={true}>Yes</option>
               <option value={false}>No</option>
             </select>
-    
-            <Link href="/dashboard/users">
-              <button type="button" className={styles.updateButton}>Submit</button>
-            </Link>
+            <button type="submit" className={styles.updateButton}>
+              Submit
+            </button>
           </form>
         </div>
       </div>

@@ -19,6 +19,30 @@ const TrainerPage = () => {
         setIsActive(!isActive);
     };
 
+    const deleteTrainer = async (id) => {
+        const confirmDelete = window.confirm('Are you sure you want to delete this trainer?');
+        if (!confirmDelete) return;
+
+        try {
+            const response = await axios.delete(`http://localhost:3001/manager/trainer/${id}`, {
+                withCredentials: true,
+            });
+
+            if (response.status === 200) {
+                // Remove the deleted trainer from the state
+                setTrainersList((prevTrainers) =>
+                    prevTrainers.filter((trainer) => trainer._id !== id)
+                );
+                alert('Trainer deleted successfully');
+            } else {
+                alert('Failed to delete the trainer');
+            }
+        } catch (error) {
+            console.error('Error deleting trainer', error.message);
+            setError('Failed to delete trainer');
+        }
+    };
+
     useEffect(() => {
         const fetchTrainersList = async () => {
             try {
@@ -56,7 +80,7 @@ const TrainerPage = () => {
         <div className={styles.container}>
             <div className={styles.top}>
                 <Search placeholder="Search for a trainer..." />
-                <Link href="/dashboard-admin/trainers/add-trainer">
+                <Link href="/dashboard-manager/trainers/add-trainer">
                     <button className={styles.addButton}>Add New</button>
                 </Link>
             </div>
@@ -104,10 +128,16 @@ const TrainerPage = () => {
                             </td>
                             <td>
                                 <div className={styles.buttons}>
-                                    <Link href="/dashboard-manager/trainers/Update">
+                                    <Link href={`/dashboard-manager/trainers/update/${user._id}`}>
                                         <button className={`${styles.button} ${styles.View}`}>View</button>
                                     </Link>
-                                    <button className={`${styles.button} ${styles.Delete}`}>Delete</button>
+                                    <button 
+                                    className={`${styles.button} ${styles.Delete}`}
+                                    onClick={() => deleteTrainer(user._id)}
+                                    >
+                                        Delete
+                                        
+                                    </button>
                                 </div>
                             </td>
                         </tr>

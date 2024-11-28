@@ -1,29 +1,34 @@
 "use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
-import styles from '@/app/ui/dashboard/trainers/addTrainer/addTrainer.module.css';
-import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
-import Link from 'next/link';
+import { useState } from "react";
+import Image from "next/image";
+import styles from "@/app/ui/dashboard/trainers/addTrainer/addTrainer.module.css";
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import axios from "axios";
+import { useParams, useRouter } from "next/navigation";
 
 const AddTrainerPage = () => {
-  const [selectedImage, setSelectedImage] = useState('/images/noavtar.png');
+  const router = useRouter();
+  const { id } = useParams();
+
+  const [selectedImage, setSelectedImage] = useState("/images/noavtar.png");
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    contact: '',
-    address: '',
-    dob: '',
-    gender: '',
-    speciality: '',
-    salary: '',
-    joiningDate: '',
-    resigningDate: '',
-    trainerID: '',
-    isActive: true,
+    fullName: "",
+    email: "",
+    password: "",
+    contact: "",
+    address: "",
+    age: "",
+    gender: "",
+    speciality: "",
+    salary: "",
+    joiningDate: "",
+    isActive: true, // Default to true for new trainers
   });
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -35,13 +40,61 @@ const AddTrainerPage = () => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData({ ...formData, [name]: value });
+
+    setFormData({
+      ...formData,
+      [name]: name === "isActive" ? JSON.parse(value) : value,
+    });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log('Form submitted:', formData);
-    // Handle form submission logic (e.g., API call)
+    const {
+      fullName,
+      email,
+      password,
+      contact,
+      address,
+      age,
+      gender,
+      speciality,
+      salary,
+      joiningDate,
+      status,
+    } = formData;
+
+    try {
+      console.log("Creating new Trainer with", formData);
+
+      const response = await axios.post(
+        "http://localhost:3001/manager/trainer/create",
+        {
+          fullName,
+          email,
+          password,
+          contact,
+          address,
+          age,
+          gender,
+          speciality,
+          salary,
+          joiningDate,
+          status,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      router.push("/dashboard-manager/trainers");
+      alert("Trainer added successfully");
+      setSuccess(true);
+      setError("");
+    } catch (error) {
+      setError("Error adding trainer");
+      setSuccess(false);
+      console.error("Error adding Trainer:", error.message);
+      alert("Failed to add trainer");
+    }
   };
 
   return (
@@ -67,16 +120,20 @@ const AddTrainerPage = () => {
         </label>
         <div className={styles.formContainer}>
           <form onSubmit={handleSubmit} className={styles.form}>
-            <label>Username <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Full Name <span className={styles.requiredStar}>*</span>
+            </label>
             <input
               type="text"
-              name="username"
+              name="fullName"
               placeholder="Full Name"
-              value={formData.username}
+              value={formData.fullName}
               onChange={handleChange}
               required
             />
-            <label>Email <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Email <span className={styles.requiredStar}>*</span>
+            </label>
             <input
               type="email"
               name="email"
@@ -84,10 +141,12 @@ const AddTrainerPage = () => {
               onChange={handleChange}
               required
             />
-            <label>Password <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Password <span className={styles.requiredStar}>*</span>
+            </label>
             <div className={styles.passwordContainer}>
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
@@ -103,7 +162,9 @@ const AddTrainerPage = () => {
                 {showPassword ? <AiFillEye /> : <AiFillEyeInvisible />}
               </span>
             </div>
-            <label>Contact <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Contact <span className={styles.requiredStar}>*</span>
+            </label>
             <input
               type="text"
               name="contact"
@@ -113,7 +174,9 @@ const AddTrainerPage = () => {
               onChange={handleChange}
               required
             />
-            <label>Address <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Address <span className={styles.requiredStar}>*</span>
+            </label>
             <input
               type="text"
               name="address"
@@ -121,16 +184,26 @@ const AddTrainerPage = () => {
               onChange={handleChange}
               required
             />
-            <label>Date of Birth <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Age <span className={styles.requiredStar}>*</span>
+            </label>
             <input
-              type="date"
-              name="dob"
-              value={formData.dob}
+              type="number"
+              name="age"
+              min="18"
+              value={formData.age}
               onChange={handleChange}
               required
             />
-            <label>Gender <span className={styles.requiredStar}>*</span></label>
-            <select name="gender" value={formData.gender} onChange={handleChange} required>
+            <label>
+              Gender <span className={styles.requiredStar}>*</span>
+            </label>
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              required
+            >
               <option value="" disabled>
                 Choose Gender
               </option>
@@ -138,8 +211,15 @@ const AddTrainerPage = () => {
               <option value="female">Female</option>
               <option value="other">Other</option>
             </select>
-            <label>Speciality <span className={styles.requiredStar}>*</span></label>
-            <select name="speciality" value={formData.speciality} onChange={handleChange} required>
+            <label>
+              Speciality <span className={styles.requiredStar}>*</span>
+            </label>
+            <select
+              name="speciality"
+              value={formData.speciality}
+              onChange={handleChange}
+              required
+            >
               <option value="" disabled>
                 Speciality
               </option>
@@ -147,7 +227,9 @@ const AddTrainerPage = () => {
               <option value="type2">Type 2</option>
               <option value="type3">Type 3</option>
             </select>
-            <label>Salary(₹) <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Salary(₹) <span className={styles.requiredStar}>*</span>
+            </label>
             <input
               type="number"
               name="salary"
@@ -157,56 +239,37 @@ const AddTrainerPage = () => {
               onChange={handleChange}
               required
             />
-            <div className={styles.dateTotalContainer}>
-              <div>
-                <label htmlFor="joiningDate">Joining Date</label>
-                <input
-                  type="date"
-                  id="joiningDate"
-                  name="joiningDate"
-                  value={formData.joiningDate}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="resigningDate">Resigning Date</label>
-                <input
-                  type="date"
-                  id="resigningDate"
-                  name="resigningDate"
-                  value={formData.resigningDate}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-            <label>TrainerID <span className={styles.requiredStar}>*</span></label>
+            <label>
+              Joining Date <span className={styles.requiredStar}>*</span>
+            </label>
             <input
-              type="number"
-              name="trainerID"
-              value={formData.trainerID}
+              type="date"
+              name="joiningDate"
+              value={formData.joiningDate}
               onChange={handleChange}
               required
             />
-            <label>Is Active?</label>
+            <label>
+              Status <span className={styles.requiredStar}>*</span>
+            </label>
             <select
-              name="isActive"
-              value={formData.isActive}
+              name="status"
+              value={formData.status}
               onChange={handleChange}
+              required
             >
-              <option value={true}>Yes</option>
-              <option value={false}>No</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="on_leave">On Leave</option>
             </select>
-            <Link href="/dashboard/trainers">
-              <button type="submit" className={styles.updateButton}>
-                Update
-              </button>
-            </Link>
+            <button type="submit" className={styles.updateButton}>
+              Add Trainer
+            </button>
           </form>
         </div>
       </div>
     </div>
   );
 };
+
 export default AddTrainerPage;

@@ -56,6 +56,7 @@ const AddManagerPage = () => {
       joinDate,
       aadharNo,
       status,
+      managerId,
     } = formData;
 
     try {

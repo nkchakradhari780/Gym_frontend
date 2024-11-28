@@ -1,28 +1,33 @@
 "use client";
 
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import Image from 'next/image';
 import styles from '@/app/ui/dashboard/trainers/singleTrainer/singleTrainer.module.css';
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import axios from 'axios';
 
 const SingleTrainerPage = () => {
+  const router = useRouter();
+  const {id} = useParams();
+
   const [selectedImage, setSelectedImage] = useState('/images/noavtar.png');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
-    username: '',
+    fullName: '',
     email: '',
     password: '',
     contact: '',
     address: '',
-    dob: '',
+    age: '',
     gender: '',
     speciality: '',
     salary: '',
     joiningDate: '',
-    resigningDate: '',
-    trainerID: '',
-    isActive: true,
+    status: 'active', // Default status
   });
 
   const handleImageChange = (event) => {
@@ -33,16 +38,79 @@ const SingleTrainerPage = () => {
     }
   };
 
+  useEffect(() => {
+    if(!id) return;
+    console.log(id)
+    const fetchTrainerDetails = async () =>{
+      try{
+        const response = await axios.get(
+          `http://localhost:3001/manager/trainer/${id}`,
+          { withCredentials: true}
+        );
+
+        console.log("Name of Trainer ", response.data);
+
+        if(response.data){
+          setFormData({
+            fullName: response.data.fullName || "",
+            email: response.data.email || "",
+            password: "",
+            contact: response.data.contact || "",
+            address: response.data.address || "",
+            age: response.data.age || "",
+            joiningDate: response.data.joiningDate
+            ? new Date(response.data.joiningDate).toISOString().split('T')[0]
+            : "", // Ensure the date is in 'YYYY-MM-DD' format            gender: response.data.gender || "",
+            speciality: response.data.speciality || "",
+            status: response.data.status || 'active', // Include status
+            salary: response.data.salary || "",
+          })
+        }
+      } catch (error) {
+        setError("error loading Trainer data")
+
+      } finally {
+        setLoading(false)
+      }
+    };
+
+    fetchTrainerDetails();
+  }, [id])
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log('Form submitted:', formData);
-    // Handle form submission logic (e.g., API call)
+    try{
+      console.log("updating")
+      const response = await axios.put(
+        `http://localhost:3001/manager/trainer/update`,
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if(response.status === 200) {
+        console.log("updated successfully")
+        router.push('/dashboard-manager/trainers')
+      }
+    } catch (error) {
+      console.error("Error Updating Trainer:", error)
+      setError("Failed to update trainer")
+    }
   };
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  if (error) {
+    return <div>{error}</div>
+  }
 
   return (
     <div className={styles.container}>
@@ -70,9 +138,9 @@ const SingleTrainerPage = () => {
             <label>Username <span className={styles.requiredStar}>*</span></label>
             <input
               type="text"
-              name="username"
+              name="fullName"
               placeholder="Full Name"
-              value={formData.username}
+              value={formData.fullName}
               onChange={handleChange}
               required
             />
@@ -84,14 +152,13 @@ const SingleTrainerPage = () => {
               onChange={handleChange}
               required
             />
-            <label>Password <span className={styles.requiredStar}>*</span></label>
+            <label>Password </label>
             <div className={styles.passwordContainer}>
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                required
                 minLength="8"
                 pattern="(?=.*[a-zA-Z])(?=.*[0-9]).{8,}"
                 title="Password must be at least 8 characters long and contain at least one letter and one number."
@@ -121,11 +188,11 @@ const SingleTrainerPage = () => {
               onChange={handleChange}
               required
             />
-            <label>Date of Birth <span className={styles.requiredStar}>*</span></label>
+            <label>Age<span className={styles.requiredStar}>*</span></label>
             <input
-              type="date"
-              name="dob"
-              value={formData.dob}
+              type="text"
+              name="age"
+              value={formData.age}
               onChange={handleChange}
               required
             />
@@ -158,7 +225,7 @@ const SingleTrainerPage = () => {
               required
             />
             <div className={styles.dateTotalContainer}>
-              <div>
+              <div> 
                 <label htmlFor="joiningDate">Joining Date</label>
                 <input
                   type="date"
@@ -169,40 +236,23 @@ const SingleTrainerPage = () => {
                   required
                 />
               </div>
-              <div>
-                <label htmlFor="resigningDate">Resigning Date</label>
-                <input
-                  type="date"
-                  id="resigningDate"
-                  name="resigningDate"
-                  value={formData.resigningDate}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+              
             </div>
-            <label>TrainerID <span className={styles.requiredStar}>*</span></label>
-            <input
-              type="number"
-              name="trainerID"
-              value={formData.trainerID}
+            
+            <label>Status <span className={styles.requiredStar}>*</span></label>
+            <select
+              name="status"
+              value={formData.status}
               onChange={handleChange}
               required
-            />
-            <label>Is Active?</label>
-            <select
-              name="isActive"
-              value={formData.isActive}
-              onChange={handleChange}
             >
-              <option value={true}>Yes</option>
-              <option value={false}>No</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="on_leave">On Leave</option>
             </select>
-            <Link href="/dashboard/trainers">
               <button type="submit" className={styles.updateButton}>
                 Update
               </button>
-            </Link>
           </form>
         </div>
       </div>

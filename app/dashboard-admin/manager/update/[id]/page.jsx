@@ -90,7 +90,7 @@ const SingleManagerPage = () => {
     console.log(id);
 
     try {
-      const response = await axios.put(
+      const response = await axios.post(
         'http://localhost:3001/owner/manager/update',
         formData,
         {
@@ -99,7 +99,8 @@ const SingleManagerPage = () => {
       );
 
       if (response.status === 200) {
-        router.push('/dashboard-admin/managers');
+        router.push('/dashboard-admin/manager');
+        alert("Manager Updated Successfully");
       }
     } catch (error) {
       setError("Failed to update Manager");
@@ -145,6 +146,7 @@ const SingleManagerPage = () => {
               value={formData.fullName}
               onChange={handleChange}
               required
+              disabled
             />
             <label>Email <span className={styles.requiredStar}>*</span></label>
             <input
@@ -153,6 +155,7 @@ const SingleManagerPage = () => {
               value={formData.email}
               onChange={handleChange}
               required
+              disabled
             />
             <label>Password</label>
             <div className={styles.passwordContainer}>
