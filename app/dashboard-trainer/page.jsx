@@ -10,7 +10,7 @@ const DashboardTrainer = () => {
     <div className={styles.wrapper}>
       <div className={styles.main}>
         <MyMembers />
-        <ChartAtt />
+        {/* <ChartAtt /> */}
       </div>
       <div className={styles.side}>
         <RightbarNotification />

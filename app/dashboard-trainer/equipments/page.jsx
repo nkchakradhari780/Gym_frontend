@@ -77,10 +77,10 @@ const EquipmentPage = () => {
   return (
     <div className={styles.container}>
       <div className={styles.top}>
-        <Search placeholder="Search for equipment..." />
-        <Link href="/dashboard-trainer/equipments/add-equipment">
+        {/* <Search placeholder="Search for equipment..." /> */}
+        {/* <Link href="/dashboard-trainer/equipments/add-equipment">
           <button className={styles.addButton}>Add New</button>
-        </Link>
+        </Link> */}
       </div>
       <table className={styles.table}>
         <thead>

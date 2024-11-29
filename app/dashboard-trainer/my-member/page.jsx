@@ -55,7 +55,7 @@ const MyMembersPage = () => {
           <tr>
             <th>Name</th>
             <th>Plan</th>
-            <th>Purchase Date</th>
+            {/* <th>Purchase Date</th> */}
             <th>Age</th>
             <th>Weight (kg)</th>
             <th>Email</th>
@@ -88,7 +88,7 @@ const MyMembersPage = () => {
                 "No Plans"
               )}
               </td>
-              <td>{member.startDate}</td>
+              {/* <td>{member.startDate}</td> */}
               <td>{member.age}</td>
               <td>{member.weight}</td>
               <td>{member.email}</td>

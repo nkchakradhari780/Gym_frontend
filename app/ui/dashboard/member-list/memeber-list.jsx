@@ -2,16 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import axios from 'axios';
 import styles from "@/app/ui/dashboard/member-list/member-list.module.css";
 
 const MemAttenPage = () => {
-  const [attendanceData, setAttendanceData] = useState([
-    { id: 1, name: "Nisha", email: "nisha@example.com", age: 25 },
-    { id: 2, name: "Nitin", email: "nitin@example.com", age: 28 },
-    { id: 3, name: "Kanha", email: "kanha@example.com", age: 30 },
-  ]);
-
   const [selectedDate, setSelectedDate] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [customerList, setCustomerList] = useState([]); // Customer list state
 
   // Set the default date to today's date
   useEffect(() => {
@@ -19,9 +17,44 @@ const MemAttenPage = () => {
     setSelectedDate(today);
   }, []);
 
+  useEffect(() => {
+    const fetchCustomerList = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3001/trainer/customer",
+          {
+            withCredentials: true,
+          }
+        );
+        if (response.data && response.data.customers) {
+          console.log("Response Data:", response.data.customers);
+          setCustomerList(response.data.customers);
+        } else {
+          console.log("No data returned from API");
+          setError("No data returned from API");
+        }
+      } catch (error) {
+        console.error("Error fetching Users List", error.message);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCustomerList();
+  }, []);
+
   const handleDateChange = (e) => {
     setSelectedDate(e.target.value);
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className={styles.container}>
@@ -38,9 +71,9 @@ const MemAttenPage = () => {
             </tr>
           </thead>
           <tbody>
-            {attendanceData.map((member) => (
+            {customerList.map((member) => (
               <tr key={member.id}>
-                <td>{member.name}</td>
+                <td>{member.fullName}</td>
                 <td>{member.email}</td>
                 <td>{member.age}</td>
                 <td>
