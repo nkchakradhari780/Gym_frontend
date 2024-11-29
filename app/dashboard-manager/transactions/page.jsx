@@ -46,11 +46,11 @@ export default function TransactionsPage() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Transactions</h1>
         {/* Add Transactions Button */}
-        <Link href="/dashboard-manager/transactions/add-transactions">
+        {/* <Link href="/dashboard-manager/transactions/add-transactions">
           <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
             Add Transactions
           </button>
-        </Link>
+        </Link> */}
       </div>
       {transactionsList.length > 0 ? (
         <table className="w-full border-collapse border border-gray-300">

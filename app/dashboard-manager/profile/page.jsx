@@ -83,8 +83,8 @@ const ManagerProfile = () => {
           <p>{managerDetails.address}</p>
         </div>
         <div className={styles.field}>
-          <h2>Date of Birth:</h2>
-          <p>{managerDetails.dob}</p>
+          <h2>Age:</h2>
+          <p>{managerDetails.age}</p>
         </div>
         <div className={styles.field}>
           <h2>Gender:</h2>
@@ -96,7 +96,7 @@ const ManagerProfile = () => {
         </div>
         <div className={styles.field}>
           <h2>Join Date:</h2>
-          <p>{managerDetails.joinDate}</p>
+          <p>{new Date(managerDetails.joinDate).toLocaleDateString()}</p>
         </div>
         <div className={styles.field}>
           <h2>Manager ID:</h2>

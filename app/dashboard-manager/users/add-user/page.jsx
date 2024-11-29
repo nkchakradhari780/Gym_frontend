@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import styles from "@/app/ui/dashboard/users/addUser/addUser.module.css";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
@@ -8,6 +8,7 @@ import Link from "next/link";
 import axios from "axios";
 
 const AddUserPage = () => {
+  const [trainersList, setTrainersList] = useState([]);
   const [selectedImage, setSelectedImage] = useState("/images/noavatar.png");
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -20,6 +21,7 @@ const AddUserPage = () => {
     age: "",
     startDate: "",
     gender: "",
+    trainer: "", // Added trainer field
   });
 
   const [error, setError] = useState("");
@@ -38,6 +40,26 @@ const AddUserPage = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  useEffect(() => {
+    const fetchTrainersList = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/manager/trainer", {
+          withCredentials: true,
+        });
+        if (response.data && response.data.trainers) {
+          setTrainersList(response.data.trainers); // Set the trainers list
+        } else {
+          setError("No Data returned from API");
+        }
+      } catch (error) {
+        console.error("Error fetching trainers:", error);
+        setError("Error fetching trainers.");
+      }
+    };
+
+    fetchTrainersList();
+  }, []);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -51,11 +73,10 @@ const AddUserPage = () => {
       age,
       startDate,
       gender,
+      trainer, // Capture trainer from form data
     } = formData;
 
     try {
-      console.log("Creating new Member with", formData);
-
       const response = await axios.post(
         "http://localhost:3001/manager/customer/create",
         {
@@ -68,17 +89,18 @@ const AddUserPage = () => {
           age,
           startDate,
           gender,
+          trainer, // Send trainer to backend
         },
         {
           withCredentials: true,
         }
-      ); // Adjust API URL if needed
+      );
       alert("User added successfully");
       setSuccess(true);
       setError("");
     } catch (error) {
-      setError("Error adding user")
-      setSuccess(false)
+      setError("Error adding user");
+      setSuccess(false);
       console.error("Error adding user:", error.message);
       alert("Failed to add user");
     }
@@ -89,7 +111,7 @@ const AddUserPage = () => {
       <div className={styles.infoContainer}>
         <div className={styles.imgContainer}>
           <Image
-            src={selectedImage} 
+            src={selectedImage}
             alt="User Avatar"
             layout="fill"
             objectFit="cover"
@@ -221,6 +243,26 @@ const AddUserPage = () => {
               onChange={handleChange}
               required
             />
+
+            {/* Trainer Dropdown */}
+            <label>
+              Select Trainer <span className={styles.requiredStar}>*</span>
+            </label>
+            <select
+              name="trainer"
+              value={formData.trainer}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                Choose Trainer
+              </option>
+              {trainersList.map((trainer) => (
+                <option key={trainer._id} value={trainer._id}>
+                  {trainer.fullName}
+                </option>
+              ))}
+            </select>
 
             <label>Is Active?</label>
             <select

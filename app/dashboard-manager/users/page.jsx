@@ -114,12 +114,22 @@ const UsersPage = () => {
                 <td>{user.email}</td>
                 <td>{user.age}</td>
                 <td>{user.gender}</td>
-                <td>{user.plan}</td>
+                <td>
+                  {/* Display the names of the plans the user is enrolled in */}
+                  {user.joinedPlans && user.joinedPlans.length > 0 ? (
+                    user.joinedPlans.map((plan, index) => (
+                      <span key={index}>
+                        {plan.planName}
+                        {index < user.joinedPlans.length - 1 ? ", " : ""}
+                      </span>
+                    ))
+                  ) : (
+                    "No Plans"
+                  )}
+                </td>
                 <td>
                   <button
-                    className={`${styles.button} ${
-                      user.isActive ? styles.active : styles.inactive
-                    }`}
+                    className={`${styles.button} ${user.isActive ? styles.active : styles.inactive}`}
                     onClick={() => toggleUserStatus(user.id)}
                   >
                     {user.isActive ? "Active" : "Inactive"}
@@ -144,7 +154,7 @@ const UsersPage = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="6">No Users found</td>
+              <td colSpan="7">No Users found</td>
             </tr>
           )}
         </tbody>
@@ -154,9 +164,9 @@ const UsersPage = () => {
   );
 
   function toggleUserStatus(userId) {
-    setUsers((prevUsers) =>
+    setUsersList((prevUsers) =>
       prevUsers.map((user) =>
-        user.id === userId ? { ...user, isActive: !user.isActive } : user
+        user._id === userId ? { ...user, isActive: !user.isActive } : user
       )
     );
   }

@@ -47,7 +47,7 @@ const SingleUserPage = () => {
           `http://localhost:3001/manager/customer/${id}`,
           { withCredentials: true }
         );
-
+        console.log(response.data.customer)
         if (response.data.customer) {
           const customer = response.data.customer;
 

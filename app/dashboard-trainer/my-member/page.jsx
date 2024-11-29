@@ -1,32 +1,52 @@
 'use client';
+
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import Image from 'next/image';
 import styles from '@/app/ui/dashboard/my-members/my-members.module.css';
 import Pagination from '@/app/ui/dashboard/pagination/pagination';
 
 const MyMembersPage = () => {
-  const membersData = [
-    {
-      id: 1,
-      name: 'Nisha Saw',
-      plan: 'Gold',
-      purchaseDate: '15-01-2024',
-      age: 30,
-      weight: 75,
-      email: 'nisha@example.com',
-      contact: '9876543210',
-    },
-    {
-      id: 2,
-      name: 'Nitin Chakradhari',
-      plan: 'Silver',
-      purchaseDate: '12-12-2023',
-      age: 28,
-      weight: 65,
-      email: 'nitin@example.com',
-      contact: '9876543211',
-    },
-    // Add more members here
-  ];
+  const [usersList, setUsersList] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsersList = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3001/trainer/customer",
+          {
+            withCredentials: true,
+          }
+        );
+
+
+        if (response.data && response.data.customers) {
+          console.log("Response Data:", response.data.customers);
+          setUsersList(response.data.customers);
+        } else {
+          console.log("No data returned from API");
+          setError("No Data returned from API");
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        setError("Error fetching users");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUsersList();
+  }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className={styles.container}>
@@ -43,8 +63,8 @@ const MyMembersPage = () => {
           </tr>
         </thead>
         <tbody>
-          {membersData.map((member) => (
-            <tr key={member.id}>
+          {usersList.map((member) => (
+            <tr key={member._id}>
               <td>
                 <div className={styles.member}>
                   <Image
@@ -54,11 +74,21 @@ const MyMembersPage = () => {
                     height={40}
                     className={styles.memberImage}
                   />
-                  {member.name}
+                  {member.fullName}
                 </div>
               </td>
-              <td>{member.plan}</td>
-              <td>{member.purchaseDate}</td>
+              <td>{member.joinedPlans && member.joinedPlans.length > 0 ? (
+                member.joinedPlans.map((plan,index) =>(
+                  <span key={index}>
+                    {plan.planName}
+                    {index < member.joinedPlans.length - 1 ? "," : ""}
+                  </span>
+                ))
+              ) : (
+                "No Plans"
+              )}
+              </td>
+              <td>{member.startDate}</td>
               <td>{member.age}</td>
               <td>{member.weight}</td>
               <td>{member.email}</td>
