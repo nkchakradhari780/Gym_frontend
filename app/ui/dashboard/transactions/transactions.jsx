@@ -18,6 +18,7 @@ const Transactions = () => {
           { withCredentials: true }
         );
         if (response.data.transections) {
+          console.log("Response Data Transections:",response.data.transections)
           setTransactionsList(response.data.transections);
         } else {
           setError('No data returned from API');

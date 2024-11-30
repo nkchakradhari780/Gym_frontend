@@ -86,7 +86,7 @@ const SidebarAdmin = () => {
                 });
 
                 if(response.data) {
-                    console.log('Response Data Sidebar:', response.data);
+                    // console.log('Response Data Sidebar:', response.data);
                     setAdminDetails(response.data.owner);
                 } else {
                     console.error('No data returned from API');
