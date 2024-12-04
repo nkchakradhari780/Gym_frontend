@@ -56,7 +56,7 @@ export default function TransactionsPage() {
             </tr>
           </thead>
           <tbody>
-            {transactionsList.map((transaction) => (
+            {transactionsList && transactionsList.map((transaction) => (
               <tr key={transaction.id} className="hover:bg-gray-50">
                 <td className="border border-gray-300 px-4 py-2">{transaction.costumer.fullName}</td>
                 <td className="border border-gray-300 px-4 py-2">{transaction._id}</td>

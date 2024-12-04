@@ -1,40 +1,64 @@
 "use client";
 
-import { useState } from "react";
-import DatePicker from "react-datepicker"; // Import the date picker
-import "react-datepicker/dist/react-datepicker.css"; // Import the CSS for the date picker
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation"; // Correctly import useParams for dynamic route parameters
+import DatePicker from "react-datepicker"; 
+import "react-datepicker/dist/react-datepicker.css";
 import styles from "@/app/ui/dashboard/attendance/singleAttendance/singleAttendance.module.css"; 
-import Pagination from '@/app/ui/dashboard/pagination/pagination';
+import Pagination from "@/app/ui/dashboard/pagination/pagination";
 
-const SingleAttendancePage = ({ memberId, memberName }) => { // Accept memberName as a prop
-  const [attendanceData, setAttendanceData] = useState([
-    { date: "01-02-2024", status: "Absent" },
-    { date: "01-03-2024", status: "Present" },
-    { date: "01-01-2024", status: "Present" },
-    { date: "01-04-2024", status: "Present" },
-    { date: "01-05-2024", status: "Absent" },
-    { date: "01-06-2024", status: "Present" },
-    { date: "01-07-2024", status: "Present" },
-  ]);
-  
+const SingleAttendancePage = () => {
+  const { role, id } = useParams(); // Extract `role` and `id` from dynamic route
+
+  const [attendanceData, setAttendanceData] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Extract the selected year from the date
   const selectedYear = selectedDate.getFullYear();
 
+  useEffect(() => {
+    if (!role || !id) return; // Wait until params are available
+
+    // Fetch attendance data
+    const fetchAttendanceData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`http://localhost:3001/owner/customer/attendance/${role}/${id}`);
+
+        console.log("Role:",role,"Id:",id);
+        console.log("Response Data:", response.data);
+        if (!response.ok) {
+          throw new Error("Failed to fetch attendance data");
+        }
+        const data = await response.json();
+        setAttendanceData(data.attendance || []); // Assuming `attendance` is the key
+        setError(null);
+      } catch (err) {
+        console.error(err);
+        setError(err.message);
+        setAttendanceData([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAttendanceData();
+  }, [role, id]);
+
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>View Attendance for {memberName}</h1> {/* Display member name */}
+      <h1 className={styles.title}>View Attendance for {role && role.charAt(0).toUpperCase() + role.slice(1)}</h1>
 
       <div className={styles.filterContainer}>
         <label>Year:</label>
         <DatePicker
           selected={selectedDate}
           onChange={(date) => setSelectedDate(date)}
-          showYearPicker // Show only year selection
-          dateFormat="yyyy" // Format to display only the year
+          showYearPicker
+          dateFormat="yyyy"
           className={styles.filterSelect}
         />
 
@@ -46,13 +70,15 @@ const SingleAttendancePage = ({ memberId, memberName }) => { // Accept memberNam
         >
           {[...Array(12).keys()].map((month) => (
             <option key={month + 1} value={month + 1}>
-              {new Date(0, month).toLocaleString('default', { month: 'long' })}
+              {new Date(0, month).toLocaleString("default", { month: "long" })}
             </option>
           ))}
         </select>
       </div>
 
-      {error ? ( 
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : error ? (
         <div className={styles.error}>{error}</div>
       ) : (
         <table className={styles.attendanceTable}>
@@ -80,9 +106,8 @@ const SingleAttendancePage = ({ memberId, memberName }) => { // Accept memberNam
           </tbody>
         </table>
       )}
-      
-        <Pagination />
 
+      <Pagination />
     </div>
   );
 };

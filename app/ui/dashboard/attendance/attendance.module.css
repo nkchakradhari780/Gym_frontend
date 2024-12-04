@@ -16,13 +16,21 @@
   justify-content: center;
   align-items: center;
   gap: 10px;
+  color: black;
+}
+
+.dateContainer1{
+  background-color: beige;
+  width: 12vw;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-weight: bolder;
 }
 
 .dateInput {
   padding: 8px;
   font-size: 0.9rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  background-color: transparent;
 }
 
 .attendanceTable {
@@ -51,22 +59,18 @@
 .presentButton {
   background-color: #28a745;
   color: white;
+  font-weight: bold;
 }
 
 .absentButton {
   background-color: #dc3545;
   color: white;
+  font-weight: bold;
 }
 
 .viewButton {
   background-color: #007bff;
   color: white;
-}
-
-.presentButton:disabled,
-.absentButton:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
 }
 
 /* Submit Button Styles */
@@ -85,4 +89,18 @@
 
 .submitButton:hover {
   background-color: #0056b3; /* Darker shade on hover */
+}
+
+.disabledButton1 {
+  background-color: #28a745;
+  color: black;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.disabledButton2 {
+  background-color: #585656; /* Style for Absent status */
+  color: rgb(0, 0, 0);
+  cursor: not-allowed;
+  opacity: 1;
 }
