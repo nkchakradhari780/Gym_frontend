@@ -135,7 +135,7 @@ const EquipmentPage = () => {
                   </div>
                 </td>
                 <td>{equipment.id}</td>
-                <td>{new Date(equipment.purchasedOn).toLocaleDateString()}</td>
+                <td>{new Date(equipment.purchaseDate).toLocaleDateString()}</td>
                 <td>{equipment.purchasePrice}</td>
                 <td>{equipment.quantity}</td>
                 <td>{equipment.purchasePrice * equipment.quantity}</td>

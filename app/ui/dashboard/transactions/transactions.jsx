@@ -66,7 +66,7 @@ const Transactions = () => {
                       height={40}
                       className={styles.userImage}
                     />
-                    {/* {transaction.costumer.fullName || 'Anonymous'} */}
+                    {transaction.costumer.fullName || 'Anonymous'}
                   </div>
                 </td>
                 <td>

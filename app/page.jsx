@@ -9,7 +9,6 @@ import styles from "@/app/ui/login/login.module.css";
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
@@ -23,18 +22,18 @@ const LoginPage = () => {
     setError('');
   
     try {
-      console.log('Attempting login with:', { email, password, role });
+      console.log('Attempting login with:', { email, password,});
       
       const response = await axios.post('http://localhost:3001/login', {
         email,
         password,
-        role,
       }, {
         withCredentials: true,
       });
-  
-      console.log('Login successful:', response.data);
-      router.push(`/dashboard-${role}`);
+      
+      let userRole = response.data.user.role 
+      console.log('Login successful:', userRole);
+      router.push(`/dashboard-${userRole}`);
   
     } catch (err) {
       setError('Invalid login credentials');
@@ -48,23 +47,7 @@ const LoginPage = () => {
       <form onSubmit={handleLogin} className={styles.form}>
         <h1>Login</h1>
 
-        {/* Role Selection Dropdown */}
-        <select
-          name="role"
-          id="role"
-          required
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className={styles.select} 
-        >
-          <option value="" disabled>
-            Choose Role
-          </option>
-          <option value="admin">Admin</option>
-          <option value="manager">Manager</option>
-          <option value="trainer">Trainer</option>
-          <option value="member">Member</option>
-        </select>
+        
 
         {/* Username Input */}
         <input

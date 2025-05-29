@@ -57,7 +57,7 @@ export default function TransactionsPage() {
           </thead>
           <tbody>
             {transactionsList && transactionsList.map((transaction) => (
-              <tr key={transaction.id} className="hover:bg-gray-50">
+              <tr key={transaction.id} className="hover:bg-slate-600">
                 <td className="border border-gray-300 px-4 py-2">{transaction.costumer.fullName}</td>
                 <td className="border border-gray-300 px-4 py-2">{transaction._id}</td>
                 <td className="border border-gray-300 px-4 py-2">{new Date(transaction.transactionDate).toLocaleDateString()}</td>

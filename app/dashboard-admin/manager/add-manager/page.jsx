@@ -22,7 +22,7 @@ const AddManagerPage = () => {
     salary: "",
     joinDate: "",
     aadharNo: "", // Add aadharNo in formData
-    status: "Active",
+    status: "active",
     managerId: "",
   });
 
@@ -80,6 +80,7 @@ const AddManagerPage = () => {
           withCredentials: true,
         }
       );
+      console.log(formData)
       router.push("/dashboard-admin/manager");
       setSuccess(true);
       setError("");

@@ -75,7 +75,7 @@ const ManagerPage = () => {
     return (
         <div className={styles.container}>
             <div className={styles.top}>
-                <Search placeholder="Search for a manager..." />
+                {/* <Search placeholder="Search for a manager..." /> */}
                 <Link href="/dashboard-admin/manager/add-manager">
                     <button className={styles.addButton}>Add New</button>
                 </Link>
@@ -85,7 +85,7 @@ const ManagerPage = () => {
                     <tr>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>DOB</th>
+                        <th>Age</th>
                         <th>Contact</th>
                         <th>Status</th>
                         <th>Action</th>
@@ -108,14 +108,14 @@ const ManagerPage = () => {
                                     </div>
                                 </td>
                                 <td>{manager.email}</td>
-                                <td>{new Date(manager.dob).toLocaleDateString()}</td> {/* Adjust if there's a specific DOB field */}
+                                <td>{manager.age}</td> {/* Adjust if there's a specific DOB field */}
                                 <td>{manager.contact}</td>
                                 <td>
                                     <button
                                         className={`${styles.button} ${manager.isActive ? styles.active : styles.inactive}`}
                                         onClick={toggleStatus}
                                     >
-                                        {manager.isActive ? 'Active' : 'Inactive'}
+                                        {manager.status}
                                     </button>
                                 </td>
                                 <td>

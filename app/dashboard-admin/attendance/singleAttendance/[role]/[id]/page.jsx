@@ -1,44 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation"; // Correctly import useParams for dynamic route parameters
-import DatePicker from "react-datepicker"; 
-import "react-datepicker/dist/react-datepicker.css";
-import styles from "@/app/ui/dashboard/attendance/singleAttendance/singleAttendance.module.css"; 
+import { useParams } from "next/navigation";
+import axios from "axios";
+import styles from "@/app/ui/dashboard/attendance/singleAttendance/singleAttendance.module.css";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
 
 const SingleAttendancePage = () => {
-  const { role, id } = useParams(); // Extract `role` and `id` from dynamic route
+  const { role, id } = useParams();
 
   const [attendanceData, setAttendanceData] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Extract the selected year from the date
-  const selectedYear = selectedDate.getFullYear();
-
   useEffect(() => {
-    if (!role || !id) return; // Wait until params are available
+    if (!role || !id) return;
 
-    // Fetch attendance data
     const fetchAttendanceData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`http://localhost:3001/owner/customer/attendance/${role}/${id}`);
+        const baseEndpoint = `http://localhost:3001/owner/${role === "member" ? "customer" : "trainer"}/attendence/${role}/${id}`;
+        const response = await axios.get(baseEndpoint, { withCredentials: true });
 
-        console.log("Role:",role,"Id:",id);
-        console.log("Response Data:", response.data);
-        if (!response.ok) {
-          throw new Error("Failed to fetch attendance data");
-        }
-        const data = await response.json();
-        setAttendanceData(data.attendance || []); // Assuming `attendance` is the key
+        setAttendanceData(response.data || []);
         setError(null);
       } catch (err) {
-        console.error(err);
-        setError(err.message);
+        console.error("Error fetching data:", err);
+        setError(err.response?.data?.message || "Failed to fetch attendance data");
         setAttendanceData([]);
       } finally {
         setIsLoading(false);
@@ -48,33 +36,24 @@ const SingleAttendancePage = () => {
     fetchAttendanceData();
   }, [role, id]);
 
+  // Format date to dd-MM-yyyy
+  const formatDate = (date) => {
+    const options = { day: "2-digit", month: "2-digit", year: "numeric" };
+    return new Intl.DateTimeFormat("en-GB", options).format(new Date(date));
+  };
+
+  const formatStatus = (status) =>
+    status === "Present" ? styles.present : styles.absent;
+
+  if (!role || !id) {
+    return <div className={styles.error}>Invalid URL parameters. Please check the URL.</div>;
+  }
+
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>View Attendance for {role && role.charAt(0).toUpperCase() + role.slice(1)}</h1>
-
-      <div className={styles.filterContainer}>
-        <label>Year:</label>
-        <DatePicker
-          selected={selectedDate}
-          onChange={(date) => setSelectedDate(date)}
-          showYearPicker
-          dateFormat="yyyy"
-          className={styles.filterSelect}
-        />
-
-        <label>Month:</label>
-        <select
-          value={selectedMonth}
-          onChange={(e) => setSelectedMonth(e.target.value)}
-          className={styles.filterSelect}
-        >
-          {[...Array(12).keys()].map((month) => (
-            <option key={month + 1} value={month + 1}>
-              {new Date(0, month).toLocaleString("default", { month: "long" })}
-            </option>
-          ))}
-        </select>
-      </div>
+      <h1 className={styles.title}>
+        View Attendance for {role.charAt(0).toUpperCase() + role.slice(1)}
+      </h1>
 
       {isLoading ? (
         <p>Loading...</p>
@@ -92,8 +71,8 @@ const SingleAttendancePage = () => {
             {attendanceData.length > 0 ? (
               attendanceData.map((entry, index) => (
                 <tr key={index}>
-                  <td>{entry.date}</td>
-                  <td className={entry.status === "Present" ? styles.present : styles.absent}>
+                  <td>{formatDate(entry.date)}</td>
+                  <td className={formatStatus(entry.status)}>
                     {entry.status}
                   </td>
                 </tr>
@@ -107,7 +86,7 @@ const SingleAttendancePage = () => {
         </table>
       )}
 
-      <Pagination />
+      <Pagination data={attendanceData} />
     </div>
   );
 };

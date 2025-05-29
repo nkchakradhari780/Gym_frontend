@@ -28,7 +28,7 @@ const SingleManagerPage = () => {
     aadharNo: '',
     joiningDate: '',
     status: 'active',
-    managerID: '', // Initialize managerID in state
+    // managerID: '', // Initialize managerID in state
   });
 
   const handleImageChange = (event) => {
@@ -72,8 +72,8 @@ const SingleManagerPage = () => {
             joiningDate: response.data.manager.joiningDate
               ? new Date(response.data.manager.joiningDate).toISOString().split('T')[0]
               : "", // Ensure the date is in 'YYYY-MM-DD' format
-            
-            managerID: response.data.manager.managerID || "",
+
+            // managerID: response.data.manager.managerID || "",
           });
         }
       } catch (error) {
@@ -235,7 +235,7 @@ const SingleManagerPage = () => {
                 />
               </div>
             </div>
-            <label>ManagerID <span className={styles.requiredStar}>*</span></label>
+            {/* <label>ManagerID <span className={styles.requiredStar}>*</span></label>
             <input
               type="number"
               name="managerID"
@@ -243,7 +243,7 @@ const SingleManagerPage = () => {
               onChange={handleChange}
               required
               disabled
-            />
+            /> */}
             <label>Status <span className={styles.requiredStar}>*</span></label>
             <select
               name="status"

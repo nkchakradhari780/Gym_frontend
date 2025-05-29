@@ -9,7 +9,7 @@ const Search = ({ placeholder }) => {
   const searchParams = useSearchParams();
   const { replace } = useRouter();
   const pathname = usePathname();
-
+  const router = useRouter();
   
   const handleSearch = useDebouncedCallback((e) => {
     const params = new URLSearchParams(searchParams);
